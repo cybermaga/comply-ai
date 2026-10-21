@@ -1,80 +1,63 @@
-# Comply AI
+# Normfold
 
-**EU AI Act readiness, one AI system at a time.**
+**AI compliance. Grounded in evidence.**
 
-Comply AI takes an AI system a company uses and turns it into a risk classification with legal basis, an obligations map, an evidence gap matrix, owned remediation tasks and a management-ready report.
+Normfold is an AI readiness product built around a structured review: understand the system, organise its evidence, identify gaps and prepare the findings for a human reviewer.
 
-**▶ Live demo:** https://cybermaga.github.io/comply-ai/demo/
-**Project page:** https://cybermaga.github.io/comply-ai/
-**Product site:** https://comply-ai-demo.vercel.app
+- [Interactive guided demo](https://cybermaga.github.io/comply-ai/demo/)
+- [Project page](https://cybermaga.github.io/comply-ai/)
+- [Product site](https://comply-ai-demo.vercel.app)
 
-![Assessment screen: HR screening tool classified as high-risk under Annex III](docs/img/assessment.jpg)
+The public demo uses **scripted data**. It demonstrates the assessment workflow and report structure; it does not run a live compliance assessment. The full product source and backend are private.
 
-## The problem
+## Explore the workflow
 
-The EU AI Act (Regulation (EU) 2024/1689) is in force, with fines up to €35M or 7% of worldwide turnover. Most companies have no inventory of their AI systems, cannot tell which ones fall under Annex III as high-risk, and do not know what evidence the law expects. That first pass is usually done by hand and takes weeks. Comply AI does it in minutes and leaves the final legal call to a human reviewer.
+1. **System profile** — purpose, users, affected people, deployment context and role in decisions.
+2. **Structured intake** — the facts and assumptions relevant to the assessment.
+3. **Evidence review** — available, partial and missing supporting material.
+4. **Preliminary assessment** — classification, reasoning, uncertainty and obligations.
+5. **Gap matrix** — requirements, evidence, gaps and proposed actions.
+6. **Remediation roadmap** — priorities and owners.
+7. **Report preview** — the structure of an assessment prepared for human review.
 
-## Workflow
-
-1. **Register the system**: purpose, users, data, deployment context
-2. **Structured intake**: vague descriptions become legally relevant answers
-3. **Collect evidence**: what exists and what is missing
-4. **Classify the risk**: prohibited / high / limited / minimal, with reasoning
-5. **Gap matrix**: requirement → evidence → gap → risk → fix
-6. **Remediation tasks**: prioritised, with owners
-7. **Report**: exported to DOCX / PDF
-
-| Gap matrix | Remediation report |
-|---|---|
-| ![Gap matrix](docs/img/gap-matrix.jpg) | ![Report](docs/img/report.jpg) |
-
-## Worked example
-
-An HR CV-screening and ranking tool used by an employer is classified **high-risk** under Art. 6(2) and Annex III, point 4(a) (recruitment and selection). Comply AI maps the Art. 9–15 requirements and Art. 26 deployer duties, finds the missing evidence (risk management, bias testing, vendor technical documentation, worker notice) and produces 10 prioritised remediation tasks plus a readiness report.
-
-## How it is built
-
-| Layer | Technology |
-|---|---|
-| Frontend | React, Vite, Tailwind CSS, Recharts |
-| Backend | Python, FastAPI (~20 domain routers) |
-| Data | MongoDB |
-| AI layer | Mistral LLM for reasoning and report drafting |
-| Documents | DOCX / PDF export |
-| Delivery | Web app, Electron desktop build, Docker Compose |
-
-The full product is about 54k lines of code. **Its source is private.** This repository contains the public guided demo and the project page.
-
-## What is real today
-
-| Capability | Status |
-|---|---|
-| Web workflow, intake, classification, evidence and gap mapping, tasks | ✅ Working |
-| LLM reasoning (Mistral), DOCX/PDF export | ✅ Working |
-| Document extraction, read-only GitHub connector | 🟡 Partial |
-| Public API, SDK, GRC integrations, CI/CD checks | ⚪ Planned |
-| Final legal classification and risk acceptance | 👤 Always human |
+The demo includes HR and healthcare scenarios, manual and automatic presentation modes, optional browser narration and a report preview with a downloadable sample in Markdown. The shared evidence, gap and report examples are illustrated with the primary HR scenario where indicated in the interface.
 
 ## This repository
 
-```
-demo/   React + Vite source of the guided demo (scripted data, no backend)
-docs/   GitHub Pages site: project page + built demo
-```
+| Path | Contents |
+|---|---|
+| `demo/` | React + Vite source for the public, scripted guided demo. |
+| `docs/index.html` | Static project page served through GitHub Pages. |
+| `docs/demo/` | Built guided demo. |
+| `docs/assets/` | Normfold identity and sharing assets. |
+| `docs/brand.md` | Naming, visual system and migration notes. |
+| `docs/img/` | Earlier interface images retained at their original URLs. |
 
-Run the demo locally:
+### Run locally
 
 ```bash
 cd demo
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # writes to ../docs/demo
+npm run dev
 ```
 
-## My role
+Create the static demo build:
 
-Founder. I defined the product and its go-to-market, translated AI Act requirements into data models and screens, and built the application end to end with AI-assisted development.
+```bash
+cd demo
+npm run build
+```
 
----
+The build writes to `docs/demo/`. Serve `docs/` with a local static server to view the portfolio and embedded demo together.
 
-*Comply AI is a readiness tool. It does not give legal advice or certify compliance. The demo uses scripted data.*
+## Identity
+
+The product is now **Normfold**, previously **Comply AI**. The existing repository name, GitHub Pages paths and Vercel hostname are intentionally retained so existing links continue to work. They are deployment addresses, not the current product name.
+
+Normfold shares a visual language with [Code & Control](https://code-and-control.com) and Machine Authority, a research project by Marharet Babaieva. Machine Authority has no public project destination configured here. Each remains a distinct project; shared styling does not imply an integrated backend or a corporate parent relationship.
+
+## Founder
+
+[Marharet Babaieva](https://linkedin.com/in/magreat) — product direction, legal workflow design and AI-assisted development.
+
+Normfold supports readiness review. It does not certify compliance. Final classification, legal interpretation and risk acceptance require a qualified human reviewer.

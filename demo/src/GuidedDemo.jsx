@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Shield, Play, Pause, RotateCcw, ChevronLeft, ChevronRight, FileText, X,
+  Play, Pause, RotateCcw, ChevronLeft, ChevronRight, FileText, X,
   Sparkles, PanelRightOpen, PanelRightClose, CheckCircle2, AlertTriangle,
   XCircle, Circle, Layers, ClipboardList, Scale, FolderSearch, ListChecks,
   Cpu, ArrowRight, ExternalLink, FastForward, Loader2,
-  Volume2, VolumeX, Captions, Repeat, Video, Gauge,
+  Volume2, VolumeX, Captions, Repeat, Video, Gauge, Download,
 } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import {
@@ -18,7 +17,47 @@ import {
 const DISCLAIMER =
   'This product provides a structured preliminary AI Act readiness assessment that supports legal, compliance and product teams. Final legal/compliance review remains human-led.';
 const SCRIPTED_NOTE =
-  'This guided demo uses scripted data to show the intended workflow. The full product contains working modules, but final legal/compliance review remains human-led.';
+  'This public tour uses synthetic scenarios and scripted outputs. It does not upload files, connect to a backend or perform a live legal assessment. Final review remains human-led.';
+
+const Brand = ({ compact = false }) => (
+  <span className={`nf-brand ${compact ? 'nf-brand-compact' : ''}`}>
+    <svg viewBox="0 0 40 40" aria-hidden="true" className="nf-mark">
+      <path d="M5 30V7L20 20V7L35 20V33L20 20V33L5 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+    <span>normfold</span>
+  </span>
+);
+
+const PortfolioLinks = ({ compact = false }) => (
+  <div className={`nf-portfolio-links ${compact ? 'nf-portfolio-compact' : ''}`}>
+    <a href="https://code-and-control.com" target="_blank" rel="noreferrer">Code &amp; Control <ExternalLink aria-hidden="true" /></a>
+    <span className="nf-portfolio-project"><span>Machine Authority</span><small>Research project · by Marharet Babaieva</small></span>
+  </div>
+);
+
+const downloadSampleReport = () => {
+  const markdown = [
+    '# Normfold — Sample AI Act Readiness Report',
+    '',
+    '**SYNTHETIC DEMO DATA · SCRIPTED OUTPUT · HUMAN REVIEW PENDING**',
+    '',
+    REPORT.subtitle,
+    '',
+    SCRIPTED_NOTE,
+    '',
+    ...REPORT.sections.flatMap((section) => [`## ${section.h}`, '', section.body, '']),
+    '## Review limitations', '', REPORT.disclaimer, '',
+    'Normfold · AI compliance. Grounded in evidence.',
+  ].join('\n');
+  const url = URL.createObjectURL(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'normfold-sample-readiness-report.md';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
 
 const TYPE_MS = 26; // per-character speed for the light typewriter (short fields)
 
@@ -30,9 +69,9 @@ const NAV_ICONS = {
 
 const riskColor = (risk = '') => {
   const r = risk.toLowerCase();
-  if (r.includes('high')) return { bg: '#FEF2F2', fg: '#B91C1C', bd: '#FECACA' };
-  if (r.includes('medium')) return { bg: '#FFFBEB', fg: '#B45309', bd: '#FDE68A' };
-  return { bg: '#ECFDF5', fg: '#047857', bd: '#A7F3D0' };
+  if (r.includes('high')) return { bg: '#f9f0ec', fg: '#7c4132', bd: '#e4c3b5' };
+  if (r.includes('medium')) return { bg: '#faf5e9', fg: '#795b24', bd: '#e6d7b0' };
+  return { bg: '#f0f4ed', fg: '#426034', bd: '#cbd9bf' };
 };
 const RiskPill = ({ risk }) => {
   const c = riskColor(risk);
@@ -42,15 +81,15 @@ const RiskPill = ({ risk }) => {
   );
 };
 const priorityColor = (p) =>
-  p === 'Critical' ? { bg: '#FEF2F2', fg: '#B91C1C' } :
-  p === 'High' ? { bg: '#FFF7ED', fg: '#C2410C' } : { bg: '#FFFBEB', fg: '#B45309' };
+  p === 'Critical' ? { bg: '#f9f0ec', fg: '#7c4132' } :
+  p === 'High' ? { bg: '#faf3e9', fg: '#8c602f' } : { bg: '#faf5e9', fg: '#795b24' };
 
 const Card = ({ children, className = '' }) => (
-  <div className={`rounded-xl border border-slate-200 bg-white ${className}`}>{children}</div>
+  <div className={`nf-panel ${className}`}>{children}</div>
 );
 const SectionTitle = ({ children, hint }) => (
   <div className="mb-3 flex items-baseline gap-2">
-    <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{children}</h3>
+    <h3 className="nf-section-title">{children}</h3>
     {hint && <span className="text-xs text-slate-400">{hint}</span>}
   </div>
 );
@@ -87,8 +126,8 @@ const Typewriter = ({ text, active, instant }) => {
 const PresenterNotes = ({ note }) => {
   const Row = ({ label, value, tone }) => (
     <div className="mb-3">
-      <p className="text-[10px] font-bold uppercase tracking-widest"
-        style={{ color: tone === 'warn' ? '#B45309' : tone === 'good' ? '#047857' : '#64748B' }}>{label}</p>
+      <p className="text-[11px] font-bold uppercase tracking-widest"
+        style={{ color: tone === 'warn' ? '#795b24' : tone === 'good' ? '#426034' : '#666b65' }}>{label}</p>
       <p className="mt-0.5 text-[13px] leading-relaxed text-slate-700">{value}</p>
     </div>
   );
@@ -119,23 +158,69 @@ const PresenterNotes = ({ note }) => {
 
 // ─── Report preview modal ─────────────────────────────────────────────────────
 const ReportModal = ({ open, onClose }) => {
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    if (!open) return;
+    const previousFocus = document.activeElement;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const focusable = () => Array.from(dialog.querySelectorAll(
+      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+    (focusable()[0] || dialog).focus({ preventScroll: true });
+    const handleDialogKey = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const controls = focusable();
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first) {
+        event.preventDefault();
+        dialog.focus({ preventScroll: true });
+      } else if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleDialogKey, true);
+    return () => {
+      document.removeEventListener('keydown', handleDialogKey, true);
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [open]);
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/50" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <h2 className="text-base font-semibold text-slate-900">{REPORT.title}</h2>
-            <StatusBadge status="demo" text="Demo report preview" />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="nf-report-title" tabIndex={-1} className="nf-report-modal relative z-10 flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden bg-white">
+        <div className="nf-report-header flex flex-shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-6 py-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-start gap-2">
+              <FileText aria-hidden="true" className="mt-1 h-5 w-5 flex-shrink-0 text-blue-600" />
+              <h2 id="nf-report-title" className="min-w-0 text-base font-semibold text-slate-900">{REPORT.title}</h2>
+            </div>
+            <div className="mt-2"><StatusBadge status="demo" text="Demo report preview" /></div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <button onClick={onClose} aria-label="Close sample report" className="flex-shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="overflow-y-auto px-8 py-6">
+        <div className="nf-report-content min-h-0 overflow-y-auto px-8 py-6">
+          <div className="nf-report-brand"><Brand compact /><span className="nf-label">SAMPLE / HR-001</span></div>
           <p className="text-sm text-slate-500">{REPORT.subtitle}</p>
+          <p className="nf-report-disclosure">Synthetic HR scenario · Scripted report · Human review pending</p>
           <div className="mt-5 space-y-5">
             {REPORT.sections.map((s) => (
               <div key={s.h}>
@@ -149,8 +234,9 @@ const ReportModal = ({ open, onClose }) => {
             <p className="mt-1 text-[13px] leading-relaxed text-amber-900">{REPORT.disclaimer}</p>
           </div>
         </div>
-        <div className="border-t border-slate-100 px-6 py-3 text-center text-[11px] text-slate-400">
-          Real DOCX/PDF export exists in the full product — this preview shows structure with demo data.
+        <div className="nf-report-footer flex-shrink-0 border-t border-slate-100 px-6 py-3">
+          <p className="text-xs text-slate-500">A sample of the report structure. No live assessment was run.</p>
+          <button onClick={downloadSampleReport} className="nf-button nf-button-secondary"><Download className="h-4 w-4" /> Download sample (.md)</button>
         </div>
       </div>
     </div>
@@ -190,17 +276,17 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
         <div className="space-y-6">
           <Card className="fade-up p-6">
             <p className="text-[17px] font-medium leading-relaxed text-slate-800">
-              “Comply AI helps companies prepare for the EU AI Act by turning AI system information, questionnaires
+              “Normfold helps companies prepare for the EU AI Act by turning AI system information, questionnaires
               and evidence into a risk classification, obligations map, gap assessment, remediation roadmap and report.”
             </p>
           </Card>
           <div>
-            <SectionTitle hint="honest maturity of each capability">Status</SectionTitle>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <SectionTitle hint="prototype modules and roadmap">Status</SectionTitle>
+            <div className="nf-capability-grid grid gap-3">
               {STATUS_CARDS.map((c, i) => (
                 <Reveal key={c.label} show={i < reveal}>
                   <Card className="p-4">
-                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-slate-800">{c.label}</span>
                       <StatusBadge status={c.status} />
                     </div>
@@ -211,9 +297,9 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
             </div>
           </div>
           {done && (
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="nf-capability-grid grid gap-4">
               <Reveal show delay={40}><Card className="p-4 ring-2 ring-emerald-200">
-                <SectionTitle>What we sell now</SectionTitle>
+                <SectionTitle>Assessment outputs</SectionTitle>
                 <ul className="space-y-1 text-[13px] text-slate-600">
                   {COMMERCIAL.sellNow.map((x) => <li key={x} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-500" />{x}</li>)}
                 </ul>
@@ -258,8 +344,8 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
               </div>
             ))}
           </Card>
-          <div className="flex items-center gap-2">
-            <StatusBadge status="working" text="Real module: AI System intake" />
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status="working" text="Prototype module: intake" />
             <StatusBadge status="demo" text="Auto-filled demo data" />
           </div>
           {done && <DoneCaption text={STEP_STATUS.system} />}
@@ -302,12 +388,12 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
             <div className="mb-2 flex items-center justify-between">
               <span className="flex items-center gap-2 text-[13px] font-medium text-slate-700">
                 {!done && <Loader2 className="h-4 w-4 animate-spin text-blue-500" />}
-                {done ? 'Evidence review completed' : EVIDENCE_COLLECTING}
+                {done ? 'Sample evidence review complete' : EVIDENCE_COLLECTING}
               </span>
               <span className="text-[13px] font-semibold text-slate-500">{pct}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300" style={{ width: `${pct}%` }} />
+              <div className="h-full rounded-full bg-blue-600 transition-all duration-300" style={{ width: `${pct}%` }} />
             </div>
           </Card>
           <div className="grid gap-4 md:grid-cols-2">
@@ -340,7 +426,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
               </ul>
             </Card>
           </div>
-          <p className="text-xs text-slate-400">Automated evidence collection: a read-only GitHub connector exists; broader connectors are planned.</p>
+          <p className="text-xs text-slate-400">Connector capability belongs to the product prototype. This tour reveals a prepared sample evidence list; no sources are connected here.</p>
           {done && <DoneCaption text={STEP_STATUS.evidence} />}
         </div>
       );
@@ -353,7 +439,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
       return (
         <div className="space-y-5">
           <Card className="p-4">
-            <SectionTitle hint="demo simulation of the analysis flow">Running assessment</SectionTitle>
+            <SectionTitle hint="demo simulation of the analysis flow">Assessment walkthrough</SectionTitle>
             <ul className="space-y-1.5">
               {ASSESSMENT_ANALYSIS.map((line, i) => {
                 const shown = i < analysisShown;
@@ -373,13 +459,13 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
           {resultShown && (
             <Reveal show>
               <Card className="overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-rose-50 to-white px-6 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-rose-50 px-6 py-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Risk classification</p>
                     <p className="text-2xl font-bold text-rose-700">{c.level}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status="working" text="Real classification flow" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status="working" text="Prototype classification flow" />
                     <StatusBadge status="reasoning" text="Demo reasoning" />
                     <StatusBadge status="required" />
                   </div>
@@ -403,8 +489,8 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
               <div className="mt-5">
                 <SectionTitle hint="what follows from a high-risk classification">Applicable obligations map</SectionTitle>
                 {notHr && <HrBanner />}
-                <Card className="overflow-hidden">
-                  <table className="w-full text-left text-[13px]">
+                <Card className="overflow-x-auto">
+                  <table className="min-w-[520px] w-full text-left text-[13px]">
                     <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
                       <tr><th className="px-4 py-2 font-semibold">Requirement</th><th className="px-4 py-2 font-semibold">Applicability</th><th className="px-4 py-2 font-semibold">Evidence</th><th className="px-4 py-2 font-semibold">Risk</th></tr>
                     </thead>
@@ -436,7 +522,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
           <div className="overflow-x-auto">
             <Card className="min-w-[860px] overflow-hidden">
               <table className="w-full text-left text-[12.5px]">
-                <thead className="bg-slate-50 text-[10.5px] uppercase tracking-wide text-slate-400">
+                <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
                   <tr>
                     {['Article / Requirement', 'Expected evidence', 'Found', 'Gap', 'Risk', 'Remediation', 'Owner', 'Status'].map((h) =>
                       <th key={h} className="px-3 py-2 font-semibold">{h}</th>)}
@@ -458,7 +544,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
                     ) : null
                   ))}
                   {reveal < GAP_MATRIX.length && (
-                    <tr><td colSpan={8} className="px-3 py-3 text-[12px] text-slate-400"><Loader2 className="mr-2 inline h-3.5 w-3.5 animate-spin" />Generating gap rows…</td></tr>
+                    <tr><td colSpan={8} className="px-3 py-3 text-[12px] text-slate-400"><Loader2 className="mr-2 inline h-3.5 w-3.5 animate-spin" />Revealing sample gap rows…</td></tr>
                   )}
                 </tbody>
               </table>
@@ -473,7 +559,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
         <div className="space-y-4">
           <HrBanner />
           <p className="text-[13px] text-slate-500">The gaps become a prioritised roadmap with owners across Legal, HR, Product, Vendor Management and Security.</p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="nf-task-grid grid gap-3">
             {TASKS.map((t, i) => {
               const pc = priorityColor(t.priority);
               return (
@@ -490,8 +576,8 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
               );
             })}
           </div>
-          <div className="flex items-center gap-2">
-            <StatusBadge status="working" text="Real module: Tasks" />
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status="working" text="Prototype module: tasks" />
             <StatusBadge status="planned" text="GRC / ticketing integration" />
           </div>
           {done && <DoneCaption text={STEP_STATUS.tasks} />}
@@ -503,7 +589,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
         <div className="space-y-4">
           <p className="text-[13px] text-slate-500">Everything comes together in a management-ready report — classification, obligations, evidence, gaps, roadmap and human-review status.</p>
           <Card className="p-6">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">{REPORT.title}</h3>
                 <p className="text-sm text-slate-500">{REPORT.subtitle}</p>
@@ -520,7 +606,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
                 </Reveal>
               ))}
               {reveal < REPORT.sections.length && (
-                <p className="text-[12px] text-slate-400"><Loader2 className="mr-2 inline h-3.5 w-3.5 animate-spin" />Building report sections…</p>
+                <p className="text-[12px] text-slate-400"><Loader2 className="mr-2 inline h-3.5 w-3.5 animate-spin" />Revealing sample report sections…</p>
               )}
             </div>
             {done && (
@@ -536,20 +622,20 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
 
     case 'future': {
       const cols = [
-        { title: 'Working now', items: ARCHITECTURE.workingNow, status: 'working' },
+        { title: 'Prototype modules', items: ARCHITECTURE.workingNow, status: 'working' },
         { title: 'Partially implemented', items: ARCHITECTURE.partial, status: 'partial' },
         { title: 'Planned', items: ARCHITECTURE.planned, status: 'planned' },
       ];
       return (
         <div className="space-y-4">
           <p className="text-[13px] text-slate-500">
-            The current product is a web app. The underlying analysis logic should later become an API/SDK and connector-based pipeline.
+            The product architecture starts with a web workflow. API, SDK and broader connector access belong to the roadmap; this public tour is a standalone demonstration.
           </p>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="nf-capability-grid grid gap-4">
             {cols.map((col, i) => (
               <Reveal key={col.title} show={i < reveal}>
                 <Card className="p-4">
-                  <div className="mb-2 flex items-center justify-between"><SectionTitle>{col.title}</SectionTitle><StatusBadge status={col.status} /></div>
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><SectionTitle>{col.title}</SectionTitle><StatusBadge status={col.status} /></div>
                   <ul className="space-y-1.5 text-[13px] text-slate-600">
                     {col.items.map((x) => <li key={x} className="flex gap-2"><Circle className="mt-1 h-2 w-2 flex-shrink-0 fill-slate-300 text-slate-300" />{x}</li>)}
                   </ul>
@@ -558,7 +644,7 @@ const StepBody = ({ stepKey, scenario, reveal, done, instant }) => {
             ))}
           </div>
           {done && (
-            <div className="fade-up rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-6 py-4 text-center">
+            <div className="fade-up rounded-xl bg-blue-600 px-6 py-4 text-center">
               <p className="text-base font-semibold text-white">{STEP_STATUS.future}</p>
             </div>
           )}
@@ -576,14 +662,14 @@ const Seg = ({ value, options, onChange, icon: Icon, title }) => (
     {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
     <div className="flex rounded-lg border border-slate-200 p-0.5">
       {options.map((o) => (
-        <button key={o.v} onClick={() => onChange(o.v)}
+        <button key={o.v} onClick={() => onChange(o.v)} aria-pressed={value === o.v}
           className={`rounded-md px-2 py-0.5 text-[11px] font-semibold transition-colors ${value === o.v ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{o.label}</button>
       ))}
     </div>
   </div>
 );
 const Chip = ({ on, onClick, icon: Icon, label, title, accent = 'blue' }) => (
-  <button onClick={onClick} title={title}
+  <button onClick={onClick} title={title} aria-pressed={on}
     className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[12px] font-medium transition-colors ${
       on ? (accent === 'rose' ? 'border-rose-300 bg-rose-50 text-rose-700' : 'border-blue-300 bg-blue-50 text-blue-700')
          : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
@@ -718,6 +804,8 @@ const GuidedDemo = () => {
   useEffect(() => {
     if (!started) return;
     const onKey = (e) => {
+      if (reportOpen) return; // The dialog owns keyboard navigation while open.
+      if (e.target.closest('button, a, input, select, textarea')) return;
       if (e.key === 'ArrowRight') next();
       else if (e.key === 'ArrowLeft') prev();
       else if (e.key === 'Escape') setReportOpen(false);
@@ -725,7 +813,7 @@ const GuidedDemo = () => {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [started, next, prev, paused]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [started, next, prev, paused, reportOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const styleTag = (
     <style>{`
@@ -737,69 +825,62 @@ const GuidedDemo = () => {
   // ── Landing ──
   if (!started) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-violet-50">
+      <div className="nf-entry">
         {styleTag}
-        <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 py-12 text-center">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg">
-            <Shield className="h-7 w-7 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            Comply AI — Guided Demo
-          </h1>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-slate-600">
-            A web-based EU AI Act readiness workflow. Watch it turn one AI system into a risk classification,
-            obligations map, gap assessment, remediation roadmap and a management-ready report.
-          </p>
+        <header className="nf-entry-header">
+          <a href="../" className="nf-brand-link" aria-label="Normfold home"><Brand /></a>
+          <span className="nf-label nf-entry-edition">PRODUCT TOUR / 2026</span>
+          <a href="../" className="nf-back-link">Project overview <ArrowRight aria-hidden="true" /></a>
+        </header>
 
-          <div className="mt-6 w-full max-w-md rounded-xl border border-slate-200 bg-white/70 p-4 text-left">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Scenario</p>
-            <div className="grid grid-cols-1 gap-2">
+        <main className="nf-entry-main">
+          <section className="nf-entry-intro">
+            <p className="nf-eyebrow"><span /> THE NORMFOLD WALKTHROUGH</p>
+            <h1>AI compliance.<br /><em>Grounded in evidence.</em></h1>
+            <p className="nf-intro-copy">Follow one AI system from its intended purpose to a clear record of requirements, evidence, gaps and next steps.</p>
+            <div className="nf-entry-process" aria-label="Walkthrough stages">
+              <span><b>01</b> Understand</span><span><b>02</b> Assess</span><span><b>03</b> Act</span>
+            </div>
+            <div className="nf-demo-disclosure">
+              <span className="nf-label">SCRIPTED PRODUCT TOUR</span>
+              <p>{SCRIPTED_NOTE}</p>
+            </div>
+          </section>
+
+          <section className="nf-entry-setup" aria-labelledby="nf-setup-title">
+            <div className="nf-setup-heading"><span className="nf-label">YOUR WALKTHROUGH</span><span className="nf-label">9 STEPS</span></div>
+            <h2 id="nf-setup-title">Start with a system.</h2>
+            <p className="nf-setup-copy">Choose a synthetic scenario to explore the assessment workflow.</p>
+            <div className="nf-scenarios" role="group" aria-label="Demo scenario">
               {Object.values(SCENARIOS).map((s) => (
-                <button key={s.key} onClick={() => setScenarioKey(s.key)}
-                  className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-                    scenarioKey === s.key ? 'border-blue-400 bg-blue-50 text-blue-800' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
-                  <span className="font-medium">{s.label}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-slate-400">{s.tag}</span>
+                <button key={s.key} onClick={() => setScenarioKey(s.key)} aria-pressed={scenarioKey === s.key}
+                  className={`nf-scenario ${scenarioKey === s.key ? 'nf-scenario-selected' : ''}`}>
+                  <span className="nf-radio" aria-hidden="true" />
+                  <span className="nf-scenario-copy"><b>{s.label}</b><small>{s.tag}</small></span>
+                  <ArrowRight aria-hidden="true" />
                 </button>
               ))}
             </div>
 
-            {/* Recording Mode (sets best settings; does NOT start the demo) */}
-            <div className="mt-3 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Video className={`h-4 w-4 ${recordingMode ? 'text-rose-500' : 'text-slate-400'}`} />
-                <div>
-                  <p className="text-sm font-medium text-slate-700">Recording Mode</p>
-                  <p className="text-[10px] text-slate-400">Slow speed · narration · subtitles · notes · auto-advance</p>
-                </div>
-              </div>
-              <button onClick={toggleRecording}
-                className={`relative h-5 w-9 rounded-full transition-colors ${recordingMode ? 'bg-rose-500' : 'bg-slate-300'}`}>
-                <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${recordingMode ? 'left-4' : 'left-0.5'}`} />
-              </button>
+            <div className="nf-recording-setting">
+              <div className="nf-recording-copy"><Video aria-hidden="true" /><span><b>Presenter setup</b><small>Slow playback, narration, subtitles and notes</small></span></div>
+              <button onClick={toggleRecording} className={`nf-switch ${recordingMode ? 'nf-switch-on' : ''}`}
+                role="switch" aria-checked={recordingMode} aria-label="Enable presenter recording setup"><span /></button>
             </div>
-            {recordingMode && <p className="mt-2 text-[11px] text-rose-600">Recording Mode is set. Click <b>Start Demo Test</b> when you’re ready to record.</p>}
-          </div>
+            {recordingMode && <p className="nf-setting-hint" role="status">Presenter setup is ready. Start the tour when you are ready to record.</p>}
 
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
-            <button onClick={() => start('auto')}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-transform hover:scale-[1.03]">
-              <Play className="h-5 w-5 fill-white" /> Start Demo Test
-            </button>
-            <button onClick={() => start('manual')}
-              className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:bg-slate-50">
-              <ChevronRight className="h-5 w-5" /> Manual Presenter Mode
-            </button>
-          </div>
-          <p className="mt-4 max-w-lg text-xs leading-relaxed text-slate-400">
-            <b>Auto Demo</b> animates each step and moves on automatically (for video). <b>Manual mode</b> animates the
-            current step, then waits — click Next to continue (for live presentation).
-          </p>
-          <p className="mt-6 max-w-xl rounded-lg bg-white/60 px-4 py-2 text-[11px] leading-relaxed text-slate-500">{DISCLAIMER}</p>
-          <Link to="/dashboard" className="mt-6 inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600">
-            Exit to full product <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
+            <div className="nf-entry-actions">
+              <button onClick={() => start('auto')} className="nf-button nf-button-primary"><Play className="h-4 w-4" /> Play guided tour <ArrowRight className="h-4 w-4" /></button>
+              <button onClick={() => start('manual')} className="nf-button nf-button-secondary">Explore at your pace <ChevronRight className="h-4 w-4" /></button>
+            </div>
+            <p className="nf-setup-footnote">Guided mode advances automatically. Manual mode lets you choose when to move on.</p>
+          </section>
+        </main>
+
+        <footer className="nf-entry-footer">
+          <div><span className="nf-label">A CONNECTED BODY OF WORK</span><PortfolioLinks /></div>
+          <p>Independent projects by Marharet Babaieva.<br />Research, assessment and delegated authority.</p>
+        </footer>
       </div>
     );
   }
@@ -809,13 +890,13 @@ const GuidedDemo = () => {
   const Ctrl = ({ onClick, disabled, children, primary, title, extra = '' }) => (
     <button onClick={onClick} disabled={disabled} title={title}
       className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${extra} ${
-        primary ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:opacity-95' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>
+        primary ? 'bg-blue-600 text-white hover:opacity-95' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>
       {children}
     </button>
   );
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-slate-50">
+    <div className="nf-shell flex h-[100dvh] flex-col bg-slate-50">
       {styleTag}
       <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
 
@@ -829,23 +910,25 @@ const GuidedDemo = () => {
       )}
 
       {/* Top control bar */}
-      <header className="flex flex-shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-2.5">
+      <header className="nf-app-header flex flex-shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600"><Shield className="h-4 w-4 text-white" /></div>
-          <span className="text-sm font-semibold text-slate-800" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Comply AI<span className="hidden sm:inline"> · Guided Demo</span></span>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">{mode === 'auto' ? 'Auto' : 'Manual'}</span>
-          {!done && <span className="hidden items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 sm:inline-flex"><Loader2 className="h-3 w-3 animate-spin" />Animating</span>}
+          <button onClick={resetDemo} className="nf-brand-link" aria-label="Return to Normfold tour setup"><Brand compact /></button>
+          <span className="nf-app-divider" aria-hidden="true" />
+          <span className="nf-label hidden sm:inline">PRODUCT TOUR</span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{mode === 'auto' ? 'Auto' : 'Manual'}</span>
+          {!done && <span className="hidden items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600 sm:inline-flex"><Loader2 className="h-3 w-3 animate-spin" />Animating</span>}
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Ctrl onClick={prev} disabled={stepIdx === 0} title="Previous step"><ChevronLeft className="h-4 w-4" /> Prev</Ctrl>
           {paused
-            ? <Ctrl onClick={resume} title="Resume animation & narration" extra="hidden sm:inline-flex"><Play className="h-4 w-4 fill-slate-700" /> Resume</Ctrl>
-            : <Ctrl onClick={pause} title="Pause animation & narration" extra="hidden sm:inline-flex"><Pause className="h-4 w-4" /> Pause</Ctrl>}
-          <Ctrl onClick={skip} disabled={done} title="Skip animation — complete this step instantly" extra="hidden sm:inline-flex"><FastForward className="h-4 w-4" /> Skip</Ctrl>
+            ? <Ctrl onClick={resume} title="Resume animation & narration" extra=""><Play className="h-4 w-4 fill-slate-700" /> Resume</Ctrl>
+            : <Ctrl onClick={pause} title="Pause animation & narration" extra=""><Pause className="h-4 w-4" /> Pause</Ctrl>}
+          <Ctrl onClick={skip} disabled={done} title="Skip animation — complete this step instantly" extra=""><FastForward className="h-4 w-4" /> Skip</Ctrl>
           <Ctrl onClick={next} disabled={isLast && done} primary title="Next (completes the animation, then advances)">Next <ChevronRight className="h-4 w-4" /></Ctrl>
           <Ctrl onClick={() => setReportOpen(true)} title="Open the report preview"><FileText className="h-4 w-4" /> Report</Ctrl>
-          <Ctrl onClick={resetDemo} title="Reset the demo" extra="hidden sm:inline-flex"><RotateCcw className="h-4 w-4" /> Reset</Ctrl>
-          <button onClick={() => setNotesOpen((v) => !v)} title="Toggle presenter notes"
+          <button onClick={() => setSubtitlesOn((v) => !v)} aria-pressed={subtitlesOn} aria-label="Toggle subtitles" className="inline-flex items-center rounded-lg border border-slate-200 bg-white p-2 text-slate-600 md:hidden"><Captions className="h-4 w-4" /></button>
+          <Ctrl onClick={resetDemo} title="Reset the demo" extra=""><RotateCcw className="h-4 w-4" /> Reset</Ctrl>
+          <button onClick={() => setNotesOpen((v) => !v)} title="Toggle presenter notes" aria-label="Toggle presenter notes" aria-expanded={notesOpen}
             className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 lg:inline-flex">
             {notesOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
           </button>
@@ -853,7 +936,7 @@ const GuidedDemo = () => {
       </header>
 
       {/* Settings row: speed / narration / subtitles / voice / recording */}
-      <div className="hidden flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-4 py-2 md:flex">
+      <div className="nf-settings hidden flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-4 py-2 md:flex">
         <Seg icon={Gauge} title="Playback speed" value={speed}
           onChange={setSpeed} options={[{ v: 'slow', label: 'Slow' }, { v: 'normal', label: 'Normal' }, { v: 'fast', label: 'Fast' }]} />
         <span className="text-slate-200">|</span>
@@ -874,10 +957,10 @@ const GuidedDemo = () => {
       </div>
 
       {/* Progress bar */}
-      <div className="flex-shrink-0 border-b border-slate-200 bg-white px-4 py-2">
+      <div className="nf-progress flex-shrink-0 border-b border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-1.5">
           {STEPS.map((s, i) => (
-            <button key={s.key} onClick={() => { setPaused(false); cancelSpeech(); goStep(i, false); }} title={s.title} className="group flex flex-1 items-center gap-1.5">
+            <button key={s.key} onClick={() => { setPaused(false); cancelSpeech(); goStep(i, false); }} title={s.title} aria-label={`Step ${i + 1}: ${s.title}`} aria-current={i === stepIdx ? 'step' : undefined} className="group flex flex-1 items-center gap-1.5">
               <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-colors ${
                 i < stepIdx ? 'bg-emerald-500 text-white' : i === stepIdx ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500 group-hover:bg-slate-300'}`}>
                 {i < stepIdx ? '✓' : i + 1}
@@ -890,7 +973,8 @@ const GuidedDemo = () => {
 
       {/* Body */}
       <div className="flex min-h-0 flex-1">
-        <nav className="hidden w-52 flex-shrink-0 overflow-y-auto border-r border-slate-200 bg-white py-3 md:block">
+        <nav aria-label="Assessment workflow" className="nf-sidebar hidden w-52 flex-shrink-0 overflow-y-auto border-r border-slate-200 bg-white py-4 md:flex md:flex-col">
+          <span className="nf-label nf-sidebar-label">ASSESSMENT WORKFLOW</span>
           {STEPS.map((s, i) => {
             const Icon = NAV_ICONS[s.key] || Circle;
             const active = i === stepIdx;
@@ -905,34 +989,36 @@ const GuidedDemo = () => {
             );
           })}
           <div className="mx-4 mt-3 border-t border-slate-100 pt-3">
-            <p className="text-[10px] leading-relaxed text-slate-400">Simplified demo navigation. The full product has more modules (CLM, orchestration, scanners, templates) — hidden here for clarity, not removed.</p>
+            <p className="text-[11px] leading-relaxed text-slate-400">Synthetic data. Scripted results. Explore the workflow; no live assessment runs in this tour.</p>
           </div>
+          <div className="nf-sidebar-portfolio"><span className="nf-label">FOUNDER PORTFOLIO</span><PortfolioLinks compact /><a href="../" className="nf-sidebar-back">Normfold overview <ArrowRight aria-hidden="true" /></a></div>
         </nav>
 
-        <main ref={scrollRef} className="min-w-0 flex-1 overflow-y-auto px-6 py-6 pb-28">
+        <main ref={scrollRef} className="nf-workspace min-w-0 flex-1 overflow-y-auto px-6 py-7 pb-28">
           <div className="mx-auto max-w-4xl">
-            <div className="mb-5 flex items-start justify-between gap-3">
+            <div className="nf-step-heading mb-6 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Step {stepIdx + 1} of {STEPS.length}</p>
-                <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>{step.title}</h1>
+                <p className="nf-label">Step {stepIdx + 1} of {STEPS.length}</p>
+                <h1 className="nf-step-title">{step.title}</h1>
                 <p className="text-sm text-slate-500">{step.subtitle}</p>
               </div>
-              <span className="flex-shrink-0 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-500">{scenario.label}</span>
+              <span className="nf-scenario-label">{scenario.label}</span>
             </div>
+            <p className="nf-inline-disclosure"><span aria-hidden="true" /> Synthetic scenario · Scripted outputs · Human review required</p>
             <StepBody stepKey={step.key} scenario={scenario} reveal={reveal} done={done} instant={instant} />
 
-            <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-4">
+            <div className="nf-step-actions mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
               <button onClick={prev} disabled={stepIdx === 0}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40">
                 <ChevronLeft className="h-4 w-4" /> {stepIdx > 0 ? STEPS[stepIdx - 1].nav : 'Previous'}
               </button>
               {isLast && done ? (
-                <button onClick={() => setReportOpen(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white">
+                <button onClick={() => setReportOpen(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
                   <FileText className="h-4 w-4" /> Open Full Report Preview
                 </button>
               ) : (
                 <button onClick={next}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white">
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
                   {!done ? 'Complete step' : STEPS[Math.min(stepIdx + 1, STEPS.length - 1)].nav} <ChevronRight className="h-4 w-4" />
                 </button>
               )}
@@ -941,7 +1027,7 @@ const GuidedDemo = () => {
         </main>
 
         {notesOpen && (
-          <aside className="hidden w-80 flex-shrink-0 overflow-y-auto border-l border-slate-200 bg-white lg:block">
+          <aside className="nf-notes hidden w-80 flex-shrink-0 overflow-y-auto border-l border-slate-200 bg-white lg:block">
             <PresenterNotes note={note} />
           </aside>
         )}

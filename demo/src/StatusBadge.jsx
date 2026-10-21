@@ -3,23 +3,23 @@
  * The wording is deliberately conservative so we never overstate maturity.
  */
 const STYLES = {
-  working:  { label: 'Working now',            bg: '#ECFDF5', fg: '#047857', bd: '#A7F3D0' },
-  demo:     { label: 'Demo data',              bg: '#F5F3FF', fg: '#6D28D9', bd: '#DDD6FE' },
-  reasoning:{ label: 'Demo reasoning',         bg: '#F5F3FF', fg: '#6D28D9', bd: '#DDD6FE' },
-  partial:  { label: 'Partially implemented',  bg: '#FFFBEB', fg: '#B45309', bd: '#FDE68A' },
-  planned:  { label: 'Planned',                bg: '#F1F5F9', fg: '#475569', bd: '#E2E8F0' },
-  internal: { label: 'Internal only',          bg: '#F8FAFC', fg: '#64748B', bd: '#E2E8F0' },
-  required: { label: 'Human review required',  bg: '#EFF6FF', fg: '#1D4ED8', bd: '#BFDBFE' },
+  working:  { label: 'Prototype module',            bg: '#f0f4ed', fg: '#426034', bd: '#cbd9bf' },
+  demo:     { label: 'Demo data',              bg: '#eff2fc', fg: '#244ac5', bd: '#cbd6f7' },
+  reasoning:{ label: 'Demo reasoning',         bg: '#eff2fc', fg: '#244ac5', bd: '#cbd6f7' },
+  partial:  { label: 'Partially implemented',  bg: '#faf5e9', fg: '#795b24', bd: '#e6d7b0' },
+  planned:  { label: 'Planned',                bg: '#f0f1e9', fg: '#525c4c', bd: '#dedfd7' },
+  internal: { label: 'Internal only',          bg: '#faf9f5', fg: '#666b65', bd: '#dedfd7' },
+  required: { label: 'Human review required',  bg: '#eff2fc', fg: '#244ac5', bd: '#cbd6f7' },
   // evidence statuses
-  found:    { label: 'Found',                  bg: '#ECFDF5', fg: '#047857', bd: '#A7F3D0' },
-  missing:  { label: 'Missing',                bg: '#FEF2F2', fg: '#B91C1C', bd: '#FECACA' },
+  found:    { label: 'Found',                  bg: '#f0f4ed', fg: '#426034', bd: '#cbd9bf' },
+  missing:  { label: 'Missing',                bg: '#f9f0ec', fg: '#7c4132', bd: '#e4c3b5' },
 };
 
 const StatusBadge = ({ status, text }) => {
   const s = STYLES[status] || STYLES.planned;
   return (
     <span
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+      className="nf-status-badge inline-flex items-center px-2 py-1 text-[10px] font-medium"
       style={{ background: s.bg, color: s.fg, border: `1px solid ${s.bd}` }}
     >
       {text || s.label}

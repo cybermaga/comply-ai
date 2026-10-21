@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>Normfold — Clarity, before deployment.</title>
+  <rect width="1200" height="630" fill="#FAF9F5"/>
+  <path d="M72 114V70L102 96V70L132 96V122L102 96V122L72 96" fill="none" stroke="#244AC5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="155" y="112" fill="#242927" font-family="Arial, sans-serif" font-weight="600" font-size="48" letter-spacing="-2">normfold</text>
+  <path d="M72 157H1128" stroke="#DCDFD6"/>
+  <text x="72" y="214" fill="#244AC5" font-family="monospace" font-size="14" letter-spacing="2">AI COMPLIANCE. GROUNDED IN EVIDENCE.</text>
+  <text x="68" y="341" fill="#242927" font-family="Georgia, serif" font-size="94" letter-spacing="-3">Clarity, before</text>
+  <text x="68" y="444" fill="#244AC5" font-family="Georgia, serif" font-style="italic" font-size="94" letter-spacing="-3">deployment.</text>
+  <path d="M889 450V222L1003 325V222L1128 325V470L1003 361V470L889 361" fill="none" stroke="#D5DBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1003 222L1128 325" stroke="#244AC5" stroke-width="2"/>
+  <path d="M72 536H1128" stroke="#DCDFD6"/>
+  <text x="72" y="577" fill="#666B65" font-family="monospace" font-size="13" letter-spacing="1">SYSTEMS / EVIDENCE / HUMAN REVIEW</text>
+  <text x="1128" y="577" fill="#666B65" text-anchor="end" font-family="Arial, sans-serif" font-size="14">A readiness prototype</text>
+</svg>

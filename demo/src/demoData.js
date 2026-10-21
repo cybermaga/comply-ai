@@ -15,10 +15,10 @@
 
 // ─── Step 0: status cards (honest maturity of each capability) ────────────────
 export const STATUS_CARDS = [
-  { label: 'Web app', status: 'working', note: 'The customer-facing web workflow is live.' },
-  { label: 'Assessment workflow', status: 'working', note: 'Intake → classification → evidence → gaps → tasks exist as real modules.' },
+  { label: 'Web app', status: 'working', note: 'Web workflow in the product prototype; shown here as a scripted tour.' },
+  { label: 'Assessment workflow', status: 'working', note: 'Prototype modules cover intake, classification, evidence, gaps and tasks.' },
   { label: 'Report preview', status: 'demo', note: 'Shown here as demo data; real DOCX/PDF export exists in the full product.' },
-  { label: 'LLM reasoning', status: 'working', note: 'Real Mistral integration in the product; scripted here for a stable demo.' },
+  { label: 'LLM reasoning', status: 'working', note: 'Mistral integration in the product prototype. No model is called in this tour.' },
   { label: 'SDK / Public API', status: 'planned', note: 'Early internal code only. Not a shipped product feature.' },
   { label: 'Plugins / connectors', status: 'partial', note: 'A read-only GitHub connector exists; others are planned.' },
   { label: 'Human legal review', status: 'required', note: 'Final legal/compliance sign-off is always human-led.' },
@@ -252,8 +252,8 @@ export const TASKS = [
 
 // ─── Step 7: report preview ───────────────────────────────────────────────────
 export const REPORT = {
-  title: 'AI Act Readiness Assessment Report',
-  subtitle: 'HR Candidate Screening Assistant · Preliminary assessment',
+  title: 'Normfold — AI Act Readiness Report',
+  subtitle: 'HR Candidate Screening Assistant · Synthetic sample assessment',
   sections: [
     {
       h: '1. Executive summary',
@@ -357,7 +357,7 @@ export const COMMERCIAL = {
 
 // ─── Steps (drives the sidebar, progress bar and Next/Prev) ───────────────────
 export const STEPS = [
-  { key: 'overview', nav: 'Overview', title: 'Demo Overview', subtitle: 'What Comply AI does and what you will see' },
+  { key: 'overview', nav: 'Overview', title: 'From system to evidence.', subtitle: 'A guided look at the Normfold assessment workflow' },
   { key: 'system', nav: 'AI System', title: 'AI System Intake', subtitle: 'Capture the facts needed to classify the system' },
   { key: 'intake', nav: 'Intake', title: 'Intake Questionnaire', subtitle: 'Turn vague descriptions into legally relevant facts' },
   { key: 'evidence', nav: 'Evidence', title: 'Evidence Review', subtitle: 'What documentation exists vs what is missing' },
@@ -365,7 +365,7 @@ export const STEPS = [
   { key: 'gaps', nav: 'Gap Matrix', title: 'Gap Matrix', subtitle: 'Requirement vs evidence vs risk vs remediation' },
   { key: 'tasks', nav: 'Tasks', title: 'Remediation Roadmap', subtitle: 'Prioritised, owner-assigned action plan' },
   { key: 'report', nav: 'Report', title: 'Report Preview', subtitle: 'Management-ready readiness report' },
-  { key: 'future', nav: 'Future Architecture', title: 'Architecture & Future Vision', subtitle: 'What is live, partial and planned' },
+  { key: 'future', nav: 'Future Architecture', title: 'A workflow with room to grow.', subtitle: 'Prototype modules, partial capabilities and the roadmap' },
 ];
 
 // ─── Presenter notes per step ─────────────────────────────────────────────────
@@ -373,7 +373,7 @@ export const PRESENTER_NOTES = {
   overview: {
     shows: 'The product one-liner, the problem it solves, and honest status of every capability.',
     why: 'Sets expectations: this is a readiness assessment tool, not automated legal compliance.',
-    say: 'Comply AI turns messy AI system information into an AI Act risk classification, obligations map, gap assessment, remediation roadmap and a management-ready report.',
+    say: 'Normfold turns messy AI system information into an AI Act risk classification, obligations map, gap assessment, remediation roadmap and a management-ready report.',
     dontClaim: 'Do not say it guarantees compliance or replaces lawyers.',
     question: 'Is this legal advice?',
     answer: 'No. It is a structured preliminary readiness assessment that supports legal and compliance teams. Final review is human-led.',
@@ -458,19 +458,19 @@ export const ASSESSMENT_ANALYSIS = [
 ];
 
 // Caption shown while the Evidence step "collects" its items.
-export const EVIDENCE_COLLECTING = 'Collecting evidence from available sources…';
+export const EVIDENCE_COLLECTING = 'Revealing the sample evidence review…';
 
 // Per-step completion caption shown once a step finishes animating.
 export const STEP_STATUS = {
   overview: 'Product positioning loaded',
   system: 'System profile completed',
   intake: 'Legally relevant facts extracted',
-  evidence: 'Evidence review completed — key gaps detected',
+  evidence: 'Sample evidence review complete — gaps illustrated',
   assessment: 'Preliminary classification ready — human review required',
   gaps: '7 obligations mapped — 6 material gaps detected',
-  tasks: 'Remediation roadmap generated',
+  tasks: 'Sample remediation roadmap ready',
   report: 'Report compiled — demo preview',
-  future: 'Web app today. Pipeline underneath. SDK/API/plugins later.',
+  future: 'Web workflow first. API, SDK and broader connectors on the roadmap.',
 };
 
 // Fields treated as "short" → light typewriter; everything else fades in.
@@ -480,7 +480,7 @@ export const TYPEWRITER_FIELDS = ['System name', 'Application domain'];
 // Concise, presenter-style. Spoken once per step; also shown as subtitles.
 export const NARRATION = {
   overview:
-    'Comply AI helps companies prepare for the EU AI Act. It turns AI system information, questionnaires and evidence into a risk classification, obligations map, gap assessment, remediation roadmap and management-ready report. This is a readiness workflow, not automated legal advice.',
+    'Normfold helps companies prepare for the EU AI Act. It turns AI system information, questionnaires and evidence into a risk classification, obligations map, gap assessment, remediation roadmap and management-ready report. This is a readiness workflow, not automated legal advice.',
   system:
     'First, we capture the AI system profile. The product needs more than a product name. It collects the intended purpose, users, affected persons, decision impact and human involvement so the assessment is based on legally relevant facts.',
   intake:
