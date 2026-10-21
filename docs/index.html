@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comply AI · EU AI Act readiness</title>
+<meta name="description" content="Comply AI turns one AI system into an EU AI Act risk classification, obligations map, gap matrix, remediation plan and report. Live interactive demo.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Comply AI · EU AI Act readiness">
+<meta property="og:description" content="From one AI system to a risk classification, gap matrix and readiness report. Try the live guided demo.">
+<meta property="og:url" content="https://cybermaga.github.io/comply-ai/">
+<meta property="og:image" content="https://cybermaga.github.io/comply-ai/img/assessment.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: product-site hero with the real app screen, then a regulation-file reading column. */
+:root{
+  --bg:#f5f6f9; --surface:#ffffff; --ink:#111a2e; --muted:#59647a; --rule:#dde2ea;
+  --accent:#2a55e5; --accent-2:#6b3ff0; --accent-soft:#e8edfd; --hero:#0d1530; --hero-ink:#eef2ff; --hero-muted:#a8b3d6;
+  --ok:#17784b; --ok-bg:#e2f3ea; --part:#9a6400; --part-bg:#fbf0d6; --plan:#575d72; --plan-bg:#eceef3; --risk:#b4232f; --risk-bg:#fde8ea;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Source Sans 3",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0b1120; --surface:#131b2d; --ink:#e8edf7; --muted:#9ba7bf; --rule:#26314a;
+  --accent:#7fa2ff; --accent-2:#a98bff; --accent-soft:#1a2747; --hero:#070c1a;
+  --ok:#6fd3a0; --ok-bg:#12301f; --part:#e9bf5d; --part-bg:#352a10; --plan:#b6bccd; --plan-bg:#232b3c; --risk:#ff8f98; --risk-bg:#3a1519; color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6}
+img{max-width:100%;display:block}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;text-wrap:balance}
+p{margin:0}
+.in{max-width:1080px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.label{font-family:var(--mono);font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* hero */
+.hero{background:var(--hero);color:var(--hero-ink);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto auto;width:760px;height:760px;background:radial-gradient(closest-side,rgba(107,63,240,.35),transparent);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:auto auto -50% -15%;width:700px;height:700px;background:radial-gradient(closest-side,rgba(42,85,229,.3),transparent);pointer-events:none}
+.hero .in{position:relative;z-index:1;padding-block:28px 0;display:flex;flex-direction:column;gap:56px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--hero-ink);text-decoration:none}
+.brand svg{width:30px;height:30px}
+nav .links{display:flex;gap:20px;font-size:.95rem}
+nav .links a{color:var(--hero-muted);text-decoration:none}
+nav .links a:hover{color:var(--hero-ink)}
+.hero-copy{display:flex;flex-direction:column;gap:22px;max-width:760px}
+.reg{font-family:var(--mono);font-size:.8rem;color:var(--hero-muted);display:flex;flex-wrap:wrap;gap:6px 14px}
+.reg span{border:1px solid rgba(168,179,214,.3);border-radius:999px;padding:3px 10px}
+.hero h1{font-size:clamp(2.5rem,6.4vw,4.6rem);font-weight:800;letter-spacing:-.03em}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#8fb0ff,#c3a8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lede{font-size:1.22rem;color:var(--hero-muted);max-width:62ch}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:10px;font-weight:600;text-decoration:none;font-size:1rem}
+.btn.primary{background:linear-gradient(90deg,#2a55e5,#6b3ff0);color:#fff;box-shadow:0 8px 24px -8px rgba(80,70,240,.7)}
+.btn.ghost{border:1px solid rgba(168,179,214,.35);color:var(--hero-ink)}
+.shot{border-radius:14px 14px 0 0;overflow:hidden;border:1px solid rgba(168,179,214,.25);border-bottom:0;box-shadow:0 -10px 60px -10px rgba(80,90,255,.35)}
+.shot .bar{display:flex;gap:6px;padding:10px 14px;background:#1a2240}
+.shot .bar i{width:10px;height:10px;border-radius:50%;background:#3a4570}
+
+/* facts */
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin-top:-1px}
+.facts div{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:4px}
+.facts strong{font-family:var(--display);font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+@media (max-width:760px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+main .in{display:flex;flex-direction:column;gap:72px;padding-block:56px 80px}
+section{display:grid;grid-template-columns:200px minmax(0,1fr);gap:12px 40px}
+section > .label{padding-top:8px;border-top:2px solid var(--ink);align-self:start}
+.body{display:flex;flex-direction:column;gap:18px;min-width:0}
+.body > p{max-width:66ch}
+section h2{font-size:clamp(1.6rem,3vw,2.1rem);font-weight:700;letter-spacing:-.01em}
+@media (max-width:820px){section{grid-template-columns:1fr}section > .label{width:max-content;padding-right:12px}}
+
+/* flow */
+ol.flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;counter-reset:s}
+ol.flow li{counter-increment:s;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+ol.flow li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+ol.flow span{color:var(--muted);font-size:.95rem}
+
+/* gallery */
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.gallery figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.gallery a{display:block;border-radius:10px;overflow:hidden;border:1px solid var(--rule);background:var(--surface)}
+.gallery img{transition:transform .3s}
+.gallery a:hover img{transform:scale(1.02)}
+.gallery figcaption{font-size:.92rem;color:var(--muted)}
+.gallery figcaption b{color:var(--ink);font-weight:600}
+@media (max-width:640px){.gallery{grid-template-columns:1fr}}
+
+/* case file */
+.case{background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.case header{padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center}
+.case h3{font-size:1.15rem;font-weight:500}
+.tier{font-family:var(--mono);font-size:.76rem;padding:4px 10px;border-radius:6px;background:var(--risk-bg);color:var(--risk);font-weight:500;letter-spacing:.05em}
+.case dl{margin:0;display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr)}
+.case dt,.case dd{margin:0;padding:12px 20px;border-bottom:1px solid var(--rule)}
+.case dt{font-family:var(--mono);font-size:.8rem;color:var(--muted);padding-top:15px}
+.case dl > :nth-last-child(-n+2){border-bottom:0}
+@media (max-width:540px){.case dl{grid-template-columns:1fr}.case dt{border-bottom:0;padding-bottom:0}}
+
+/* stack */
+.stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px 24px}
+.stack div{border-left:2px solid var(--accent);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:2px}
+.stack span{color:var(--muted);font-size:.95rem}
+
+/* status */
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{text-align:left;padding:12px 18px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-weight:500;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font-family:var(--mono);font-size:.74rem;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.part{background:var(--part-bg);color:var(--part)}.pill.plan{background:var(--plan-bg);color:var(--plan)}
+
+ul.did{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;max-width:70ch}
+ul.did li{padding-left:22px;position:relative}
+ul.did li::before{content:"";position:absolute;left:0;top:.62em;width:10px;height:2px;background:var(--accent)}
+
+.closing{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:28px;display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center}
+.closing h2{font-size:1.5rem}
+.closing .btn.ghost{border-color:var(--rule);color:var(--ink)}
+footer{border-top:1px solid var(--rule);color:var(--muted);font-size:.9rem}
+footer .in{padding-block:24px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="in">
+    <nav>
+      <a class="brand" href="#"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2a55e5"/><path d="M16 7l7 3v5.5c0 4.6-3 8.3-7 9.5-4-1.2-7-4.9-7-9.5V10l7-3z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M12.5 16l2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Comply AI</a>
+      <div class="links"><a href="#workflow">Workflow</a><a href="#screens">Screens</a><a href="#build">Build</a><a href="https://github.com/cybermaga/comply-ai">GitHub</a></div>
+    </nav>
+    <div class="hero-copy">
+      <div class="reg"><span>Regulation (EU) 2024/1689</span><span>Annex III</span><span>Art. 9–15 · 26</span></div>
+      <h1>EU AI Act readiness, <em>one AI system at a time.</em></h1>
+      <p class="lede">Comply AI takes an AI system a company uses and turns it into a risk classification with legal basis, an obligations map, an evidence gap matrix, owned remediation tasks and a report leadership can sign off on.</p>
+      <div class="cta">
+        <a class="btn primary" href="./demo/">Try the live demo →</a>
+        <a class="btn ghost" href="https://github.com/cybermaga/comply-ai">View on GitHub</a>
+      </div>
+    </div>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i></div><img src="img/assessment.jpg" alt="Comply AI assessment screen classifying an HR screening tool as high-risk under Annex III" width="1440" height="900"></div>
+  </div>
+</header>
+
+<main>
+  <div class="in">
+    <div class="facts">
+      <div><span class="label">Role</span><strong>Founder</strong></div>
+      <div><span class="label">Started</span><strong>Oct 2025</strong></div>
+      <div><span class="label">Codebase</span><strong>~54k lines</strong></div>
+      <div><span class="label">Stage</span><strong>Working prototype</strong></div>
+    </div>
+
+    <section>
+      <div class="label">Problem</div>
+      <div class="body">
+        <h2>Companies use AI they have never classified.</h2>
+        <p>The AI Act is in force and fines reach €35M or 7% of worldwide turnover. Most companies have no inventory of their AI systems, cannot tell which fall under Annex III as high-risk, and do not know what evidence the law expects. Today that first pass is done by hand by consultants and lawyers, and it takes weeks.</p>
+        <p>Comply AI produces a structured first pass in minutes, so the legal or compliance team starts from an organised file. Final legal conclusions stay with a human reviewer.</p>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="label">Workflow</div>
+      <div class="body">
+        <h2>From a system description to a signed-off report.</h2>
+        <ol class="flow">
+          <li><strong>Register the system</strong><span>Purpose, users, data, deployment context</span></li>
+          <li><strong>Structured intake</strong><span>Vague descriptions become legally relevant answers</span></li>
+          <li><strong>Collect evidence</strong><span>What documents exist and what is missing</span></li>
+          <li><strong>Classify the risk</strong><span>Prohibited, high, limited or minimal, with reasoning shown</span></li>
+          <li><strong>Gap matrix</strong><span>Requirement, evidence, gap, risk and fix in one row</span></li>
+          <li><strong>Remediation tasks</strong><span>Prioritised, with owners across Legal, HR and Product</span></li>
+          <li><strong>Report</strong><span>Exported to DOCX or PDF for leadership or an auditor</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="screens">
+      <div class="label">Screens</div>
+      <div class="body">
+        <h2>The demo, step by step.</h2>
+        <div class="gallery">
+          <figure><a href="img/gap-matrix.jpg"><img src="img/gap-matrix.jpg" alt="Gap matrix mapping AI Act articles to evidence, gaps, risk and remediation" loading="lazy" width="1440" height="900"></a><figcaption><b>Gap matrix.</b> Each article becomes a row with expected evidence, what was found, the gap and the fix.</figcaption></figure>
+          <figure><a href="img/tasks.jpg"><img src="img/tasks.jpg" alt="Prioritised remediation tasks with owners" loading="lazy" width="1440" height="900"></a><figcaption><b>Remediation.</b> Gaps turn into prioritised tasks with named owners.</figcaption></figure>
+          <figure><a href="img/report.jpg"><img src="img/report.jpg" alt="AI Act readiness assessment report preview" loading="lazy" width="1440" height="900"></a><figcaption><b>Report.</b> Executive summary, legal basis, obligations and roadmap in one document.</figcaption></figure>
+          <figure><a href="img/demo-landing.jpg"><img src="img/demo-landing.jpg" alt="Guided demo start screen with HR and healthcare scenarios" loading="lazy" width="1440" height="900"></a><figcaption><b>Guided demo.</b> Auto-play or presenter mode, two scenarios, optional narration.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="label">Worked example</div>
+      <div class="body">
+        <h2>An HR screening tool, assessed.</h2>
+        <div class="case">
+          <header><h3>CV screening and candidate ranking</h3><span class="tier">HIGH-RISK</span></header>
+          <dl>
+            <dt>Legal basis</dt><dd>Art. 6(2) with Annex III, point 4(a): AI used for recruitment and selection of candidates</dd>
+            <dt>Role</dt><dd>Deployer, using a third-party vendor's model</dd>
+            <dt>Obligations</dt><dd>Art. 9–15 requirements on the provider side, Art. 26 deployer duties, human oversight, informing affected workers</dd>
+            <dt>Typical gaps</dt><dd>No documented risk management, no bias testing evidence, no vendor technical documentation on file</dd>
+            <dt>Output</dt><dd>Gap matrix, 10 prioritised remediation tasks, exportable readiness report</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section id="build">
+      <div class="label">Build</div>
+      <div class="body">
+        <h2>How it is built.</h2>
+        <div class="stack">
+          <div><strong>Frontend</strong><span>React, Vite, Tailwind CSS, Recharts</span></div>
+          <div><strong>Backend</strong><span>Python and FastAPI with about 20 domain routers: systems, evidence, assessments, remediation, templates, reports</span></div>
+          <div><strong>Data</strong><span>MongoDB with workspaces and per-project records</span></div>
+          <div><strong>AI layer</strong><span>Mistral LLM reasons over intake answers and drafts report text</span></div>
+          <div><strong>Documents</strong><span>DOCX and PDF report export</span></div>
+          <div><strong>Delivery</strong><span>Web app, Electron desktop build, Docker Compose. This demo is a static React build.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="label">Status</div>
+      <div class="body">
+        <h2>What is real today.</h2>
+        <p>The product labels every capability, so nothing planned is presented as finished.</p>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>Capability</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Web workflow, intake, classification, evidence and gap mapping, tasks</td><td><span class="pill ok">Working</span></td></tr>
+              <tr><td>LLM reasoning (Mistral), DOCX/PDF report export</td><td><span class="pill ok">Working</span></td></tr>
+              <tr><td>Document extraction, read-only GitHub connector</td><td><span class="pill part">Partial</span></td></tr>
+              <tr><td>Public API, SDK, GRC integrations, continuous checks in CI/CD</td><td><span class="pill plan">Planned</span></td></tr>
+              <tr><td>Final legal classification and risk acceptance</td><td><span class="pill plan">Always human</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="label">My role</div>
+      <div class="body">
+        <h2>What I did.</h2>
+        <ul class="did">
+          <li>Defined the product: the buyer, what they receive, and how the AI Act becomes a step-by-step workflow</li>
+          <li>Translated legal requirements (risk tiers, Annex III use cases, provider and deployer duties) into data models and screens</li>
+          <li>Built the full-stack application with AI-assisted development: React frontend, FastAPI backend, LLM integration, report export</li>
+          <li>Designed the guided demo with presenter mode, narration and honesty labels for client and investor calls</li>
+          <li>Wrote the go-to-market plan: a software-supported readiness assessment, priced per AI system or by subscription</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="closing">
+      <div><h2>See it run.</h2><p style="color:var(--muted)">The demo plays the full HR scenario in about three minutes.</p></div>
+      <div class="cta"><a class="btn primary" href="./demo/">Open the demo →</a><a class="btn ghost" href="https://github.com/cybermaga">GitHub profile</a></div>
+    </div>
+  </div>
+</main>
+
+<footer><div class="in"><span>Comply AI is a readiness tool. It does not give legal advice or certify compliance.</span><span>Demo uses scripted data · full product source is private</span></div></footer>
+</body>
+</html>
