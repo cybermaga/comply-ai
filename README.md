@@ -6,6 +6,7 @@ Comply AI takes an AI system a company uses and turns it into a risk classificat
 
 **▶ Live demo:** https://cybermaga.github.io/comply-ai/demo/
 **Project page:** https://cybermaga.github.io/comply-ai/
+**Product site:** https://comply-ai-demo.vercel.app
 
 ![Assessment screen: HR screening tool classified as high-risk under Annex III](docs/img/assessment.jpg)
 
