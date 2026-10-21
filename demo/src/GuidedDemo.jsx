@@ -62,6 +62,15 @@ const downloadSampleReport = () => {
 const TYPE_MS = 26; // per-character speed for the light typewriter (short fields)
 
 // ─── tiny helpers ─────────────────────────────────────────────────────────────
+
+// Stable component identity preserves toolbar focus during animated reveals.
+const Ctrl = ({ onClick, disabled, children, primary, title, extra = '' }) => (
+  <button onClick={onClick} disabled={disabled} title={title}
+    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${extra} ${
+      primary ? 'bg-blue-600 text-white hover:opacity-95' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>
+    {children}
+  </button>
+);
 const NAV_ICONS = {
   overview: Layers, system: Cpu, intake: ClipboardList, evidence: FolderSearch,
   assessment: Scale, gaps: AlertTriangle, tasks: ListChecks, report: FileText, future: Sparkles,
@@ -196,7 +205,10 @@ const ReportModal = ({ open, onClose }) => {
     document.addEventListener('keydown', handleDialogKey, true);
     return () => {
       document.removeEventListener('keydown', handleDialogKey, true);
-      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({ preventScroll: true });
+      const returnTarget = previousFocus instanceof HTMLElement && previousFocus.isConnected
+        ? previousFocus
+        : document.querySelector('button[title="Open the report preview"]');
+      if (returnTarget instanceof HTMLElement) returnTarget.focus({ preventScroll: true });
     };
   }, [open]);
 
@@ -887,13 +899,6 @@ const GuidedDemo = () => {
 
   // ── Running demo ──
   const note = PRESENTER_NOTES[step.key];
-  const Ctrl = ({ onClick, disabled, children, primary, title, extra = '' }) => (
-    <button onClick={onClick} disabled={disabled} title={title}
-      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${extra} ${
-        primary ? 'bg-blue-600 text-white hover:opacity-95' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>
-      {children}
-    </button>
-  );
 
   return (
     <div className="nf-shell flex h-[100dvh] flex-col bg-slate-50">
