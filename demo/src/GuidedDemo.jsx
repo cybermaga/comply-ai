@@ -806,16 +806,16 @@ const GuidedDemo = () => {
 
   // ── Running demo ──
   const note = PRESENTER_NOTES[step.key];
-  const Ctrl = ({ onClick, disabled, children, primary, title }) => (
+  const Ctrl = ({ onClick, disabled, children, primary, title, extra = '' }) => (
     <button onClick={onClick} disabled={disabled} title={title}
-      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${extra} ${
         primary ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:opacity-95' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}`}>
       {children}
     </button>
   );
 
   return (
-    <div className="flex h-screen flex-col bg-slate-50">
+    <div className="flex h-[100dvh] flex-col bg-slate-50">
       {styleTag}
       <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
 
@@ -832,28 +832,28 @@ const GuidedDemo = () => {
       <header className="flex flex-shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-2.5">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600"><Shield className="h-4 w-4 text-white" /></div>
-          <span className="text-sm font-semibold text-slate-800" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Comply AI · Guided Demo</span>
+          <span className="text-sm font-semibold text-slate-800" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>Comply AI<span className="hidden sm:inline"> · Guided Demo</span></span>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">{mode === 'auto' ? 'Auto' : 'Manual'}</span>
           {!done && <span className="hidden items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 sm:inline-flex"><Loader2 className="h-3 w-3 animate-spin" />Animating</span>}
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Ctrl onClick={prev} disabled={stepIdx === 0} title="Previous step"><ChevronLeft className="h-4 w-4" /> Prev</Ctrl>
           {paused
-            ? <Ctrl onClick={resume} title="Resume animation & narration"><Play className="h-4 w-4 fill-slate-700" /> Resume</Ctrl>
-            : <Ctrl onClick={pause} title="Pause animation & narration"><Pause className="h-4 w-4" /> Pause</Ctrl>}
-          <Ctrl onClick={skip} disabled={done} title="Skip animation — complete this step instantly"><FastForward className="h-4 w-4" /> Skip</Ctrl>
+            ? <Ctrl onClick={resume} title="Resume animation & narration" extra="hidden sm:inline-flex"><Play className="h-4 w-4 fill-slate-700" /> Resume</Ctrl>
+            : <Ctrl onClick={pause} title="Pause animation & narration" extra="hidden sm:inline-flex"><Pause className="h-4 w-4" /> Pause</Ctrl>}
+          <Ctrl onClick={skip} disabled={done} title="Skip animation — complete this step instantly" extra="hidden sm:inline-flex"><FastForward className="h-4 w-4" /> Skip</Ctrl>
           <Ctrl onClick={next} disabled={isLast && done} primary title="Next (completes the animation, then advances)">Next <ChevronRight className="h-4 w-4" /></Ctrl>
           <Ctrl onClick={() => setReportOpen(true)} title="Open the report preview"><FileText className="h-4 w-4" /> Report</Ctrl>
-          <Ctrl onClick={resetDemo} title="Reset the demo"><RotateCcw className="h-4 w-4" /> Reset</Ctrl>
+          <Ctrl onClick={resetDemo} title="Reset the demo" extra="hidden sm:inline-flex"><RotateCcw className="h-4 w-4" /> Reset</Ctrl>
           <button onClick={() => setNotesOpen((v) => !v)} title="Toggle presenter notes"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+            className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 lg:inline-flex">
             {notesOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
           </button>
         </div>
       </header>
 
       {/* Settings row: speed / narration / subtitles / voice / recording */}
-      <div className="flex flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-4 py-2">
+      <div className="hidden flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-4 py-2 md:flex">
         <Seg icon={Gauge} title="Playback speed" value={speed}
           onChange={setSpeed} options={[{ v: 'slow', label: 'Slow' }, { v: 'normal', label: 'Normal' }, { v: 'fast', label: 'Fast' }]} />
         <span className="text-slate-200">|</span>
